@@ -1,0 +1,7 @@
+---
+ - hosts: drbd_hosts 
+   roles:
+   - drbd
+     
+    
+  

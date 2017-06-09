@@ -1,0 +1,8 @@
+[drbd_hosts]
+172.17.172.60
+172.17.172.61
+
+[drbd_hosts:vars]
+disk_1=/dev/vda
+disk_2=/dev/vdc
+master_node = 172.17.172.60

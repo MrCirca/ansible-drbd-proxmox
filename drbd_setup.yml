@@ -1,0 +1,17 @@
+---
+- name: Download DRBD9 plugin respository
+- apt_key:
+    url: "https://packages.linbit.com/package-signing-pubkey.asc"
+    state: present
+
+- name: Add repository
+- apt-repository:
+    repo: deb http://packages.linbit.com/proxmox/ proxmox-4 drbd-9.0
+    filename: 'linbit'
+    state: present
+
+- name: Update & drbdmanage-proxmox installation
+  apt:
+    update_cache: yes
+    name: drbdmanage-proxmox
+    state: latest
