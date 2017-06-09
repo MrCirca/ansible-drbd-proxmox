@@ -1,17 +1,21 @@
 ---
 - name: Download DRBD9 plugin respository
-- apt_key:
+  apt_key:
     url: "https://packages.linbit.com/package-signing-pubkey.asc"
     state: present
 
 - name: Add repository
-- apt-repository:
-    repo: deb http://packages.linbit.com/proxmox/ proxmox-4 drbd-9.0
-    filename: 'linbit'
+  apt_repository:
+    repo: "deb https://packages.linbit.com/proxmox/ proxmox-4 drbd-9.0"
     state: present
 
-- name: Update & drbdmanage-proxmox installation
+- name: Update apt cache - Ignoring enterpise repo...
   apt:
     update_cache: yes
+    state: latest
+  ignore_errors: yes
+
+- name: Installation of drbdmanage-proxmox
+  apt:
     name: drbdmanage-proxmox
     state: latest

@@ -41,10 +41,10 @@
 # leading 0s:
 
 #db-[99:101]-node.example.com
-[amazon]
-aws-1.mrcirca.com
-aws-2.mrcirca.com
-aws-3.mrcirca.com
+[drbd_agents]
+172.17.172.60
+172.17.172.61
 
-[home]
-agrinio
+[drbd_master]
+172.17.172.49
+

@@ -1,7 +1,9 @@
 ---
- - hosts: drbd_hosts 
-   roles:
-   - drbd
+- hosts: drbd_master
+  roles:
+    - drbd
      
+  vars_files:
+    - group_vars/drbd_hosts
     
   

@@ -1,8 +1,4 @@
 ---
-- name:
-  apt:
-    update_cache: yes
-
 - name: Confirm that packages are installed
   apt:
     name: "{{ item }}"
@@ -14,8 +10,8 @@
 
 
 - name: Initiallizing Cluster only on master node
-  shell: drbdmanage init
-  when: ansible_host == master_node
+  command: echo yes | drbdmanage init 
+  when: inventory_hostname in groups['drbd_master']
 
 - name: Add Nodes
   shell: drbdmanage add-node {{ ansible_hostname }} {{ ansible_default_ipv4["address"] }}
@@ -24,8 +20,7 @@
 
 - name: How to Join
   shell: drbdmanage howto-join {{ ansible_hostname }}
-  delegate_to: {{ ansible_default_ipv4["address"] }}
-  when: ansible_host == master_node
+  when: ansible_host != {{}}
   with_items: "{{ drbd_agents }}"
 - name: Agents join in cluster
   shell:
