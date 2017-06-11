@@ -15,12 +15,13 @@
 
 - name: Add Nodes
   shell: drbdmanage add-node {{ ansible_hostname }} {{ ansible_default_ipv4["address"] }}
-  when: ansible_host == master_node
-  with_items: "{{ drbd_agents }}"
+  when: not ansible_host in groups['drbd_master']
 
 - name: How to Join
   shell: drbdmanage howto-join {{ ansible_hostname }}
-  when: ansible_host != {{}}
-  with_items: "{{ drbd_agents }}"
+  register: howto_join_result
+  when: not ansible_host in groups['drbd_master']
+  delegate_to: 
+
 - name: Agents join in cluster
   shell:
