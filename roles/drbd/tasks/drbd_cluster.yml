@@ -11,17 +11,19 @@
 
 - name: Initiallizing Cluster only on master node
   command: echo yes | drbdmanage init 
-  when: inventory_hostname in groups['drbd_master']
+  when: inventory_hostname in group_names['drbd_master']
 
 - name: Add Nodes
   shell: drbdmanage add-node {{ ansible_hostname }} {{ ansible_default_ipv4["address"] }}
-  when: not ansible_host in groups['drbd_master']
+  when: ansible_host not in group_names['drbd_master']
 
 - name: How to Join
-  shell: drbdmanage howto-join {{ ansible_hostname }}
-  register: howto_join_result
-  when: not ansible_host in groups['drbd_master']
-  delegate_to: 
+  shell: drbdmanage howto-join {{ item }}
+  with_items: groups_names['drbd_agents']
+  register: results
+  when: ansible_host in group_names['drbd_master']
 
 - name: Agents join in cluster
-  shell:
+  shell: {{ results }}
+  when: ansible_host not in group_names['drbd_master']
+  with_items: 
