@@ -1,5 +1,5 @@
 ---
-- hosts: drbd_master
+- hosts: all
   roles:
     - drbd
      

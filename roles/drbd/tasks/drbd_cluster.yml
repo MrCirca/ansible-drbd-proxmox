@@ -8,32 +8,31 @@
     - lvm2
     - drbdmanage 
 
-- name: Debugging
-  debug:
-    msg: "System {{ ansible_hostname }}  {{ groups['drbd_master'] }}"
-
 - name: Initiallizing Cluster only on master node
   command: echo yes | drbdmanage init 
   when: ansible_default_ipv4["address"] in groups['drbd_master']
 
 - name: Add Nodes
   shell: drbdmanage add-node {{ ansible_hostname }} {{ ansible_default_ipv4["address"] }}
-  when: ansible_default_ipv4["address"] not in groups['drbd_master']
+  when: ansible_default_ipv4["address"] in groups['drbd_agents']
 
 - name: How to Join
-  shell: drbdmanage howto-join {{ item }}
+  shell: drbdmanage howto-join {{ hostvars[item]['ansible_hostname'] }}
   with_items: groups['drbd_agents']
   register: howto_join
   when: ansible_default_ipv4["address"] in groups['drbd_master']
 
 - name: Agents join in cluster
-  shell: "{{ item  }}"
+  shell: "{{ item['stdout']  }}"
   when: ansible_default_ipv4["address"] not in groups['drbd_master']
-  with_items: "{{ howto_join.results }}"
+  with_items: "{{ howto_join['results'] }}"
 
-- name: Modify config
-  shell: drbdmanage modify-config --node {{ ansible_hostname }}
-  register: editing_config
+- name: Restart Drbdmanage at all
+  command: drbdmanage restart -q
+  
+#- name: Modify config
+#  shell: drbdmanage modify-config --node {{ ansible_hostname }}
+#  register: editing_config
 
 #- name: Comment out config
   
