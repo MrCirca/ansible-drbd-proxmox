@@ -42,7 +42,7 @@
 
 #db-[99:101]-node.example.com
 [drbd_agents]
-172.17.172.57
+172.17.172.48
 
 
 [drbd_master]
