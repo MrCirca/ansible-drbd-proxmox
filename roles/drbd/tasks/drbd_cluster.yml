@@ -29,10 +29,4 @@
 
 - name: Restart Drbdmanage at all
   command: drbdmanage restart -q
-  
-#- name: Modify config
-#  shell: drbdmanage modify-config --node {{ ansible_hostname }}
-#  register: editing_config
-
-#- name: Comment out config
-  
+ 
