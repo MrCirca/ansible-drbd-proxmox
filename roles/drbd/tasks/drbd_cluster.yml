@@ -20,10 +20,17 @@
 - name: How to Join
   shell: drbdmanage howto-join {{ item }}
   with_items: groups_names['drbd_agents']
-  register: results
+  register: howto_join
   when: ansible_host in group_names['drbd_master']
 
 - name: Agents join in cluster
-  shell: {{ results }}
+  shell: {{ howto_join }}
   when: ansible_host not in group_names['drbd_master']
-  with_items: 
+  with_items: "{{ howto_join.results }}"
+
+- name: Modify config
+  shell: drbdmanage modify-config --node {{ ansible_hostname }}
+  register: editing_config
+
+- name: Comment out config
+  
