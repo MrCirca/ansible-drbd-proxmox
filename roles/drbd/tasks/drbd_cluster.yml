@@ -28,12 +28,8 @@
   register: howto_join
   when: inventory_hostname == drbd_primary_node and item != drbd_primary_node
 
-- name: Debug
-  debug:
-    msg: "{{ howto_join['results'] }}"
-
 - name: Agents join in cluster
-  shell: "{{ item['stdout']  }}"
+  shell: "{{ item['stdout'] }}"
   when: inventory_hostname != drbd_primary_node 
   with_items: "{{ howto_join['results'] }}"
 

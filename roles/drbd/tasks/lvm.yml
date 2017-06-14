@@ -1,7 +1,7 @@
 ---
 - name: Create volume group
   lvg:
-    vg: drbdpool
+    vg: "{{ drbd_vg_name }}"
     pvs: "{{ drbd_disks }}"
 
 - name: Create volumes
