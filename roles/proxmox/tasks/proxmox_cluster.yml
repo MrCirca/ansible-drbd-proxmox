@@ -3,11 +3,6 @@
   shell: pvecm create my-cluster
   when: ansible_default_ipv4["address"] in groups['drbd_master']
 
-- name: Get master ip address
-  shell: echo {{ ansible_default_ipv4["address"] }}
-  register: master_ip_address
-  when: ansible_hostname in groups['drbd_master']
-
 - name: Nodes add themselves in cluster
   shell: pvecm add {{ master_ip_address }}
   when: ansible_default_ipv4["address"] in groups['drbd_agents']
