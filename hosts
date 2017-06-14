@@ -1,4 +1,4 @@
-# This is the default ansible 'hosts' file.
+#This is the default ansible 'hosts' file.
 #
 # It should live in /etc/ansible/hosts
 #
@@ -41,10 +41,7 @@
 # leading 0s:
 
 #db-[99:101]-node.example.com
-[drbd_agents]
-172.17.172.48
 
-
-[drbd_master]
-172.17.172.49
-
+[test1_drbd_nodes]
+pve.in.modulus.gr
+pve2.in.modulus.gr

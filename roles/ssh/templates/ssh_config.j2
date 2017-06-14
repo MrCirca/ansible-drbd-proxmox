@@ -1,0 +1,9 @@
+Host {{myhostname}} {{fqdn}}
+    HostName {{ real_fqdn }}
+    IdentityFile ~/.ssh/{{ private_key_namme}} # private key for realname
+    User {{ user+}}
+
+Host myother realname2.example.org
+    HostName realname2.example.org
+    IdentityFile ~/.ssh/realname2_rsa
+    User remoteusername

@@ -1,5 +1,0 @@
----
-disks:
-  - /dev/vda
-vg_name: drbdpool
-lv_name: drbdthinpool

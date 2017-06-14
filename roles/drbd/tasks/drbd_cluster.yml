@@ -8,23 +8,33 @@
     - lvm2
     - drbdmanage 
 
+- name: Set fact
+  set_fact:
+    drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
+
 - name: Initiallizing Cluster only on master node
-  command: echo yes | drbdmanage init 
-  when: ansible_default_ipv4["address"] in groups['drbd_master']
+  command: drbdmanage init -q
+  when: inventory_hostname == drbd_primary_node
+
 
 - name: Add Nodes
-  shell: drbdmanage add-node {{ ansible_hostname }} {{ ansible_default_ipv4["address"] }}
-  when: ansible_default_ipv4["address"] in groups['drbd_agents']
+  shell: drbdmanage add-node {{ hostvars[item]['inventory_hostname_short'] }} {{ hostvars[item]['ansible_default_ipv4']["address"] }}
+  with_items:  groups[target+'_drbd_nodes'][1:] 
+  when: inventory_hostname == drbd_primary_node
 
 - name: How to Join
-  shell: drbdmanage howto-join {{ hostvars[item]['ansible_hostname'] }}
-  with_items: groups['drbd_agents']
+  shell: drbdmanage howto-join {{ hostvars[item]['inventory_hostname_short'] }}
+  with_items: groups[target+'_drbd_nodes']
   register: howto_join
-  when: ansible_default_ipv4["address"] in groups['drbd_master']
+  when: inventory_hostname == drbd_primary_node and item != drbd_primary_node
+
+- name: Debug
+  debug:
+    msg: "{{ howto_join['results'] }}"
 
 - name: Agents join in cluster
   shell: "{{ item['stdout']  }}"
-  when: ansible_default_ipv4["address"] not in groups['drbd_master']
+  when: inventory_hostname != drbd_primary_node 
   with_items: "{{ howto_join['results'] }}"
 
 - name: Restart Drbdmanage at all

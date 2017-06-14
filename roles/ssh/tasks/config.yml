@@ -1,0 +1,8 @@
+---
+- name: Create config file
+  template:
+     src: ssh_config.j2
+     dst: ~/.ssh/config
+     owner: root
+     group: root
+     mode: '0644'

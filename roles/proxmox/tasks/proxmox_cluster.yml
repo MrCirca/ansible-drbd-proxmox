@@ -1,9 +1,12 @@
 ---
+- name: known_hosts
+  
 - name: Create a cluster on master
   shell: pvecm create my-cluster
   when: ansible_default_ipv4["address"] in groups['drbd_master']
 
 - name: Nodes add themselves in cluster
-  shell: pvecm add {{ master_ip_address }}
+  shell: pvecm add {{ item }}
+  with_items: groups['drbd_master']
   when: ansible_default_ipv4["address"] in groups['drbd_agents']
 
