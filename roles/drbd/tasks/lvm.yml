@@ -12,6 +12,4 @@
 
 - name: Convert volume to thin-pool
   command: "lvconvert --type thin-pool -y --force {{ drbd_vg_name }}/{{ drbd_lv_name }}"
-  register: result
-  failed_when: not result.stderr.endswith("is already pool.")
  
