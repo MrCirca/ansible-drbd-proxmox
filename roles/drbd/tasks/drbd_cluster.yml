@@ -12,6 +12,10 @@
   set_fact:
     drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
 
+- name: Set fact for agents
+  set_fact:
+    drbd_agents: "{{ groups[target+'_drbd_nodes'][1:] }}"
+
 - name: Initiallizing Cluster only on master node
   command: drbdmanage init -q
   when: inventory_hostname == drbd_primary_node
@@ -19,19 +23,32 @@
 
 - name: Add Nodes
   shell: drbdmanage add-node {{ hostvars[item]['inventory_hostname_short'] }} {{ hostvars[item]['ansible_default_ipv4']["address"] }}
-  with_items:  groups[target+'_drbd_nodes'][1:] 
+  with_items: drbd_agents 
   when: inventory_hostname == drbd_primary_node
 
 - name: How to Join
-  shell: drbdmanage howto-join {{ hostvars[item]['inventory_hostname_short'] }}
-  with_items: groups[target+'_drbd_nodes']
+  shell: drbdmanage howto-join -q {{ hostvars[item]['inventory_hostname_short'] }}
+  with_items: drbd_agents
   register: howto_join
-  when: inventory_hostname == drbd_primary_node and item != drbd_primary_node
+  when: inventory_hostname == drbd_primary_node and item in drbd_agents
+
+- name: Debug How to join
+  debug:
+    var: howto_join
+
+- name: Debug
+  debug:
+    msg: " ITEM HAS STDOUT: {{ item.get('stdout', 'mpampmplamp') }}"
+  with_items: "{{ howto_join['results'] }}"
+
+#- name: Debug How to join
+#  debug:
+#    var: hostvars[drbd_primary_node]['howto_join']['results']
 
 - name: Agents join in cluster
-  shell: "{{ item['stdout'] }}"
-  when: inventory_hostname != drbd_primary_node 
-  with_items: "{{ howto_join['results'] }}"
+  command: "{{ item['stdout'] }}"
+  when: inventory_hostname in drbd_agents
+  with_items: hostvars[drbd_primary_node]['howto_join']['results']
 
 - name: Restart Drbdmanage at all
   command: drbdmanage restart -q
