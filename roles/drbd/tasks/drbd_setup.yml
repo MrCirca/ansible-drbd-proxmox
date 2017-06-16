@@ -13,7 +13,7 @@
   lineinfile: 
      dest: /etc/apt/sources.list.d/pve-enterprise.list
      regexp: '^deb'
-     insertbefore: '^deb'
+     insertbefore: '^#deb'
      line: '#'
      state: present
 - name: Update apt cache
