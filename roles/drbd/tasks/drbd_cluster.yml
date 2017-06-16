@@ -34,15 +34,6 @@
 
 - name: Debug How to join
   debug:
-    var: howto_join
-
-- name: Debug
-  debug:
-    msg: " ITEM HAS STDOUT: {{ item.get('stdout', 'mpampmplamp') }}"
-  with_items: "{{ howto_join['results'] }}"
-
-- name: Debug How to join
-  debug:
     var: hostvars[drbd_primary_node]['howto_join']['results']
 
 - name: Agents join in cluster
