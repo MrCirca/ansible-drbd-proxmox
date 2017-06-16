@@ -1,8 +1,14 @@
 ---
-- name: Create config file
-  template:
-     src: ssh_config.j2
-     dst: ~/.ssh/config
-     owner: root
-     group: root
-     mode: '0644'
+- name: Cat public keys of hosts
+  shell: cat /root/.ssh/id_rsa.pub
+  register: public_key
+
+- name: 
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ hostvars[item]['public_key']['stdout'] }}"
+  with_items: groups[target + '_drbd_nodes']
+  when: item != inventory_hostname
+  
+  

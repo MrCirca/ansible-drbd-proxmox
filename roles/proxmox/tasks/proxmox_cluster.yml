@@ -1,12 +1,17 @@
 ---
-- name: known_hosts
+- name: Set fact Proxmox master
+  set_fact:
+    proxmox_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
+
+- name: Set fact for Proxmox agents
+  set_fact:
+    proxmox_agents: "{{ groups[target+'_drbd_nodes'][1:] }}"
   
 - name: Create a cluster on master
   shell: pvecm create my-cluster
-  when: ansible_default_ipv4["address"] in groups['drbd_master']
+  when: inventory_hostname_short in proxmox_primary_node
 
 - name: Nodes add themselves in cluster
-  shell: pvecm add {{ item }}
-  with_items: groups['drbd_master']
-  when: ansible_default_ipv4["address"] in groups['drbd_agents']
-
+  shell: pvecm add {{ item }} --force
+  with_items: hostvars[proxmox_primary_node]['ansible_default_ipv4']["address"]
+  when: inventory_hostname in proxmox_agents 
