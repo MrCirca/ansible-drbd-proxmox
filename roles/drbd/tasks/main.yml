@@ -2,3 +2,4 @@
 - include: lvm.yml
 - include: drbd_setup.yml
 - include: drbd_cluster.yml
+- include: storage_plugin.yml
