@@ -1,4 +1,11 @@
 ---
+- name: Comment proxmox enterprise repository
+  lineinfile:
+     dest: /etc/apt/sources.list.d/pve-enterprise.list
+     regexp: '^'
+     line: '#deb https://enterprise.proxmox.com/debian jessie pve-enterprise'
+     state: present
+
 - name: Download DRBD9 plugin respository
   apt_key:
     url: "https://packages.linbit.com/package-signing-pubkey.asc"
@@ -9,13 +16,6 @@
     repo: "deb https://packages.linbit.com/proxmox/ proxmox-4 drbd-9.0"
     state: present
 
-- name: Comment proxmox enterprise repository
-  lineinfile: 
-     dest: /etc/apt/sources.list.d/pve-enterprise.list
-     regexp: '^deb'
-     insertbefore: '^#deb'
-     line: '#'
-     state: present
 - name: Update apt cache
   apt:
     update_cache: yes

@@ -9,10 +9,13 @@
   shell: drbdmanage modify-config --node {{ hostvars[item]['inventory_hostname_short'] }}
   environment:
     EDITOR: /etc/storage_plugin.sh
-  with_items: groups[target+'_drbd_nodes']
+  with_items: "{{ groups[target+'_drbd_nodes'] }}"
   when: inventory_hostname == groups[target+'_drbd_nodes'][0]
 
 - name: Delete script
   file:
     path: ~/storage_plugin.sh
     state: absent
+
+- name: Drbdmanage restart
+  command: drbdmanage restart -q

@@ -3,12 +3,17 @@
   shell: cat /root/.ssh/id_rsa.pub
   register: public_key
 
-- name: 
+- name:
   authorized_key:
     user: root
     state: present
     key: "{{ hostvars[item]['public_key']['stdout'] }}"
-  with_items: groups[target + '_drbd_nodes']
+  with_items: "{{ groups[target + '_drbd_nodes'] }}"
   when: item != inventory_hostname
-  
-  
+
+- name: Known Hosts
+  known_hosts:
+    path: ~/root/.ssh/known_hosts
+    name: "{{ groups[target + '_drbd_nodes'][0] }}"
+    key: "{{ hostvars[groups[target + '_drbd_nodes'][0]]['public_key']['stdout'] }}"
+  when: inventory_hostname != groups[target + '_drbd_nodes'][0]
