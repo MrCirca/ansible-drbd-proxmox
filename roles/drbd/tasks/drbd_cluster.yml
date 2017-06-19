@@ -26,6 +26,9 @@
   with_items: "{{ drbd_agents }}"
   when: inventory_hostname == drbd_primary_node
 
+- name: Optional pause for DBus
+  pause:
+    seconds: 5
 - name: How to Join
   shell: drbdmanage howto-join -q {{ hostvars[item]['inventory_hostname_short'] }}
   with_items: "{{ drbd_agents }}"
