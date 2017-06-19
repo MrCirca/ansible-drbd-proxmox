@@ -11,12 +11,14 @@
   with_items: "{{groups[target+'_drbd_nodes']}}"
   when: item != inventory_hostname
 
-
+- name: Create known_hosts files...
+  file:
+    path: /root/.ssh/known_hosts
+    state: touch
 
 - name: Known Hosts
   known_hosts:
-    path: ~/root/.ssh/known_hosts
-    name: "{{ groups[target + '_drbd_nodes'][0] }}"
+    name: groups[target+'_drbd_nodes']
     key: "{{ hostvars[item]['public_key']['stdout'] }}"
-  with_items: "{{ groups[target + 'drbd_nodes'] }}"
-  when: item == inventory_hostname
+    path: /root/.ssh/known_hosts
+  with_items: "{{ groups[target+'_drbd_nodes'][0] }}"
