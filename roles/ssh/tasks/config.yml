@@ -1,24 +1,29 @@
 ---
-- name: Cat public keys
-  shell: cat /root/.ssh/id_rsa.pub
-  register: public_key
+- name: Add hosts to /etc/hosts for resolve
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
 
-- name: Hosts exchanges their hosts
+- name: Cat public keys for root
+  shell: cat /root/.ssh/id_rsa.pub
+  register: root_public_key
+
+- name: Cat public keys for hosts
+  shell: cat /etc/ssh/ssh_host_rsa_key.pub
+  register: host_public_key
+
+- name: Add authorized keys for root user
   authorized_key:
     user: root
     state: present
-    key: "{{ hostvars[item]['public_key']['stdout'] }}"
+    key: "{{ hostvars[item]['root_public_key']['stdout'] }}"
   with_items: "{{groups[target+'_drbd_nodes']}}"
   when: item != inventory_hostname
 
-- name: Create known_hosts files...
-  file:
-    path: /root/.ssh/known_hosts
-    state: touch
-
-- name: Known Hosts
+- name: Add host_public_key to known hosts
   known_hosts:
-    name: groups[target+'_drbd_nodes']
-    key: "{{ hostvars[item]['public_key']['stdout'] }}"
+    name: "{{ item }}"
     path: /root/.ssh/known_hosts
-  with_items: "{{ groups[target+'_drbd_nodes'][0] }}"
+    key: "{{ item }} {{ hostvars[item]['host_public_key']['stdout'] }}"
+  with_items: "{{ groups[target+'_drbd_nodes'] }}"
+  when: item != inventory_hostname
