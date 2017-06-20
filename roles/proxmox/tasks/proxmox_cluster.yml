@@ -13,9 +13,19 @@
 
 - name: Nodes add themselves in cluster
   shell: pvecm add {{ item }} --force
-  with_items: "{{ hostvars[proxmox_primary_node]['ansible_default_ipv4']["address"] }}"
+  with_items: "{{ hostvars[proxmox_primary_node]['ansible_hostname'] }}"
   when: inventory_hostname in proxmox_agents
 
-- name: Add drbdstorage configuration in /etc/pve/drbdstorage.cfg
-  shell: echo -e "drbd:' drbdstorage\n\tcontent images,rootdir\n\tredudancy {{groups[target+'_drbd_nodes'] | length }}'" >> /etc/pve/storage.cfg
-  when: inventory_hostname in proxmox_primary_node 
+- name: Add drbdstorage configuration in a storage file
+  template:
+    src: storage.j2
+    dest: /etc/pve/storage  
+  when: inventory_hostname == proxmox_primary_node
+
+- name: Append content of storage file to storage.cfg
+  shell: cat /etc/pve/storage >> /etc/pve/storage.cfg
+  when: inventory_hostname == proxmox_primary_node
+
+- name: Delete storage
+  shell: rm /etc/pve/storage
+  when: inventory_hostname == proxmox_primary_node
