@@ -25,7 +25,7 @@
   ignore_errors: yes
 
 - name: Nodes add themselves in cluster
-  command: pvecm add {{ proxmox_primary_node }} --force
+  command: pvecm add {{ proxmox_primary_node }} -force 1
   when: inventory_hostname in proxmox_agents
 
 - name: Add drbdstorage configuration in a storage file
