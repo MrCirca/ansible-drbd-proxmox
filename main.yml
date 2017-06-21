@@ -1,9 +1,9 @@
 ---
 - hosts: all
   roles:
-#     - drbd
      - ssh
      - proxmox
+     - drbd
   vars_files:
     - group_vars/test1_drbd_cluster
     

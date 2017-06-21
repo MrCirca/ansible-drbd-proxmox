@@ -25,7 +25,7 @@
   ignore_errors: yes
 
 - name: Nodes add themselves in cluster
-  command: pvecm add {{ proxmox_primary_node }} -force 1
+  command: pvecm add {{ proxmox_primary_node }} --force 1
   register: result
   until: result.rc == 0
   retries: 5

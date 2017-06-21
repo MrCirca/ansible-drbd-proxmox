@@ -17,7 +17,7 @@
     user: root
     state: present
     key: "{{ hostvars[item]['root_public_key']['stdout'] }}"
-  with_items: "{{groups[target+'_drbd_nodes']}}"
+  with_items: "{{ groups[target+'_drbd_nodes'] }}"
   when: item != inventory_hostname
 
 - name: Add host_public_key to known hosts
