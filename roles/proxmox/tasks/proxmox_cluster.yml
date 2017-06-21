@@ -1,15 +1,15 @@
 ---
-- name: Comment proxmox enterprise repository
-  lineinfile:
-     dest: /etc/apt/sources.list.d/pve-enterprise.list
-     regexp: '^'
-     line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
-     state: present
-
-- name: Updates
-  apt:
-    update_cache: yes
-    upgrade: dist
+#- name: Comment proxmox enterprise repository
+#  lineinfile:
+#     dest: /etc/apt/sources.list.d/pve-enterprise.list
+#     regexp: '^'
+#     line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
+#     state: present
+#
+#- name: Updates
+#  apt:
+#    update_cache: yes
+#    upgrade: dist
 
 - name: Set fact Proxmox master
   set_fact:
@@ -26,7 +26,11 @@
 
 - name: Nodes add themselves in cluster
   command: pvecm add {{ proxmox_primary_node }} -force 1
+  register: result
+  until: result.rc == 0
+  retries: 5
   when: inventory_hostname in proxmox_agents
+  
 
 - name: Add drbdstorage configuration in a storage file
   template:
