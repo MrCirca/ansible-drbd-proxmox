@@ -24,6 +24,8 @@
 - name: Add Nodes
   shell: drbdmanage add-node {{ hostvars[item]['inventory_hostname_short'] }} {{ hostvars[item]['ansible_default_ipv4']["address"] }}
   with_items: "{{ drbd_agents }}"
+  loop_control:
+    pause: 5
   when: inventory_hostname == drbd_primary_node
 
 - name: Optional pause for DBus
@@ -32,6 +34,8 @@
 - name: How to Join
   shell: drbdmanage howto-join -q {{ hostvars[item]['inventory_hostname_short'] }}
   with_items: "{{ drbd_agents }}"
+  loop_control:
+    pause: 5
   register: howto_join
   when: inventory_hostname == drbd_primary_node and item in drbd_agents
 
@@ -39,6 +43,8 @@
   command: "{{ item['stdout'] }}"
   when: inventory_hostname in drbd_agents and item['item'] == inventory_hostname
   with_items: "{{ hostvars[drbd_primary_node]['howto_join']['results'] }}"
+  loop_control:
+    pause: 5
 
 - name: Restart Drbdmanage at all
   command: drbdmanage restart -q

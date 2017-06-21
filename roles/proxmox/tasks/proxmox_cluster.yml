@@ -1,4 +1,16 @@
 ---
+- name: Comment proxmox enterprise repository
+  lineinfile:
+     dest: /etc/apt/sources.list.d/pve-enterprise.list
+     regexp: '^'
+     line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
+     state: present
+
+- name: Updates
+  apt:
+    update_cache: yes
+    upgrade: dist
+
 - name: Set fact Proxmox master
   set_fact:
     proxmox_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
@@ -10,10 +22,7 @@
 - name: Create a cluster on master
   shell: pvecm create my-cluster
   when: inventory_hostname_short in proxmox_primary_node
-
-- name: Pause Playbook
-  pause:
-    seconds: 10
+  ignore_errors: yes
 
 - name: Nodes add themselves in cluster
   command: pvecm add {{ proxmox_primary_node }} --force
@@ -21,14 +30,7 @@
 
 - name: Add drbdstorage configuration in a storage file
   template:
-    src: storage.j2
-    dest: /etc/pve/storage  
+    src: storage.cfg.j2
+    dest: /etc/pve/storage.cfg 
   when: inventory_hostname == proxmox_primary_node
 
-- name: Append content of storage file to storage.cfg
-  shell: cat /etc/pve/storage >> /etc/pve/storage.cfg
-  when: inventory_hostname == proxmox_primary_node
-
-- name: Delete storage
-  shell: rm /etc/pve/storage
-  when: inventory_hostname == proxmox_primary_node
