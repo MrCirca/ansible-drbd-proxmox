@@ -1,0 +1,12 @@
+dir: local
+	path /var/lib/vz
+	content iso,vztmpl,backup
+
+lvmthin: local-lvm
+	thinpool data
+	vgname pve
+	content rootdir,images
+
+drbd: drbdstorage
+	content images,rootdir
+	redudancy {{ groups[target + '_drbd_nodes'] | count }}
