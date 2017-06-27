@@ -37,11 +37,8 @@
   retries: 5
   when: inventory_hostname == drbd_primary_node and item in drbd_agents
 
-- name: Restart drbdmanage
-  command: drbdmanage restart -q
-
 - name: Agents join in cluster
-  command: "{{ item['stdout'] }}"
+  shell: "{{ item['stdout'] }}"
   with_items: "{{ hostvars[drbd_primary_node]['howto_join']['results'] }}"
   register: command_output
   until: command_output.rc == 0

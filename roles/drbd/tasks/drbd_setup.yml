@@ -23,5 +23,7 @@
 
 - name: Installation of drbdmanage-proxmox
   apt:
-    name: drbdmanage-proxmox
+    name: 
+      - drbdmanage-proxmox
+      - drbd-dkms
     state: latest

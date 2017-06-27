@@ -3,7 +3,7 @@
   roles:
      - ssh
      - proxmox
-#     - drbd
+     - drbd
   vars_files:
     - group_vars/test1_drbd_cluster
     

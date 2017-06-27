@@ -1,11 +1,19 @@
 ---
 - name: Comment proxmox enterprise repository
   lineinfile:
-     dest: /etc/apt/sources.list.d/pve-enterprise.list
-     regexp: '^'
-     line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
-     state: present
+    dest: /etc/apt/sources.list.d/pve-enterprise.list
+    regexp: '^'
+    line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
+    state: present
 
+- name: Touch repo file
+  shell: touch /etc/apt/sources.list.d/proxmox.list
+
+- name: Add Proxmox repo
+  lineinfile:
+    dest: /etc/apt/sources.list.d/proxmox.list
+    regexp: '^'
+    line: 'deb http://download.proxmox.com/debian jessie pve-no-subscription'
 - name: Updates
   apt:
     update_cache: yes
