@@ -1,12 +1,9 @@
 ---
-- name: Optional timout for dbus crash....
-  pause:
-    seconds: 20
 - name: Create script - Storage Plugin
   template:
     src: storage_plugin.sh.j2
     dest: /etc/storage_plugin.sh 
-    mode: "0700"
+    mode: "0755"
 
 - name: Modify Config 
   shell: drbdmanage modify-config --node {{ hostvars[item]['inventory_hostname_short'] }}
@@ -19,7 +16,7 @@
 
 - name: Delete script
   file:
-    path: ~/storage_plugin.sh
+    path: /etc/storage_plugin.sh
     state: absent
 
 - name: Drbdmanage restart

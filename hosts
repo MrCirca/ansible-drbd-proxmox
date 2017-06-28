@@ -45,5 +45,7 @@
 [test1_drbd_nodes]
 pve.in.modulus.gr
 pve2.in.modulus.gr
+pve3.in.modulus.gr
 
-
+[local]
+localhost

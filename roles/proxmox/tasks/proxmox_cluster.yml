@@ -14,11 +14,35 @@
     dest: /etc/apt/sources.list.d/proxmox.list
     regexp: '^'
     line: 'deb http://download.proxmox.com/debian jessie pve-no-subscription'
+
 - name: Updates
   apt:
     update_cache: yes
     upgrade: dist
 
+- name: Reboot
+  shell: reboot
+  async: yes
+  when: reboot | default(False)
+
+- name: Wait for reboot
+  wait_for:
+    port: 22
+    state: stopped
+  when: reboot | default(False)
+
+- name: local action
+  wait_for:
+    port: 22
+    host: "{{ ansible_default_ipv4.address }}"
+    timeout: 60
+  delegate_to: localhost
+
+- name: Wait to start hosts
+  wait_for:
+    port: 8006
+    state: started
+    
 - name: Set fact Proxmox master
   set_fact:
     proxmox_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
