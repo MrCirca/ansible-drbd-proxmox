@@ -1,8 +1,12 @@
 ---
 - hosts: "{{ target + '_drbd_nodes' }}"
+  serial:
+    - 3
+    - 1
+    - 1 
   roles:
-#     - ssh
-#     - proxmox
+     - common
+     - proxmox
      - drbd
   vars_files:
     - group_vars/test1_drbd_cluster

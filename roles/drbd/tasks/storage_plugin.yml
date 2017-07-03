@@ -19,5 +19,3 @@
     path: /etc/storage_plugin.sh
     state: absent
 
-- name: Drbdmanage restart
-  command: drbdmanage restart -q
