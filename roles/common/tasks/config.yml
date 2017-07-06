@@ -42,59 +42,40 @@
   lineinfile:
     dest: /etc/apt/sources.list.d/pve-enterprise.list
     regexp: '^'
-    line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
+    line: '#deb https://enterprise.proxmox.com/debian jessie pve-enterprise'
     state: present
   tags:
     - update
 
-- name: Touch repo file
-  shell: touch /etc/apt/sources.list.d/proxmox.list
-  tags:
-    - update
+   
+#- name: Reboot
+#  shell: reboot
+#  async: yes
+#  when: reboot | default(False)
+#  tags:
+#    - reboot
 
-- name: Add Proxmox repo
-  lineinfile:
-    dest: /etc/apt/sources.list.d/proxmox.list
-    regexp: '^'
-    line: 'deb http://download.proxmox.com/debian jessie pve-no-subscription'
-  tags:
-    - update
+#- name: Wait for reboot
+#  wait_for:
+#    port: 22
+#    state: stopped
+#  when: reboot | default(False)
+#  tags:
+#    - reboot
 
-- name: Updates
-  apt:
-    update_cache: yes
-    upgrade: dist
-  tags:
-    - update
+#- name: local action
+#  wait_for:
+#    port: 22
+#    host: "{{ ansible_default_ipv4.address }}"
+#    timeout: 60
+#  delegate_to: localhost
+#  tags:
+#    - reboot
 
-- name: Reboot
-  shell: reboot
-  async: yes
-  when: reboot | default(False)
-  tags:
-    - reboot
-
-- name: Wait for reboot
-  wait_for:
-    port: 22
-    state: stopped
-  when: reboot | default(False)
-  tags:
-    - reboot
-
-- name: local action
-  wait_for:
-    port: 22
-    host: "{{ ansible_default_ipv4.address }}"
-    timeout: 60
-  delegate_to: localhost
-  tags:
-    - reboot
-
-- name: Wait to start hosts
-  wait_for:
-    port: 8006
-    state: started
-  tags:
-    - reboot
+#- name: Wait to start hosts
+#  wait_for:
+#    port: 8006
+#    state: started
+#  tags:
+#    - reboot
 

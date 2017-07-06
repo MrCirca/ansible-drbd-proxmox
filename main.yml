@@ -1,14 +1,19 @@
 ---
+#- hosts: "{{ target + '_drbd_nodes' }}"
+#  roles:
+#     - common
+#     - proxmox
+   
+#- hosts: "{{ target + '_drbd_nodes' }}"
+#  roles:
+#    - role: drbd_init
+
 - hosts: "{{ target + '_drbd_nodes' }}"
-  serial:
-    - 3
-    - 1
-    - 1 
+#  serial: 1
   roles:
-     - common
-     - proxmox
-     - drbd
-  vars_files:
-    - group_vars/test1_drbd_cluster
-    
-  
+    - role: drbd_node_add
+
+- hosts: "{{ target + '_drbd_nodes' }}"
+  roles:
+    - role: drbd_storage_plugin
+

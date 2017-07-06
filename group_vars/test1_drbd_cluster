@@ -1,6 +1,0 @@
----
-drbd_disks:
-  - /dev/vda
-drbd_vg_name: drbdpool
-drbd_lv_name: drbdthinpool
-

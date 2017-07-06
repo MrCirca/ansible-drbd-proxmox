@@ -1,9 +1,0 @@
-#!/bin/bash
-temp_file=$1
-echo -e "[GLOBAL]\n\n[node:{{ inventory_hostname_short }}]\n\n[Plugin:ThinLV]\nvolume-group = {{ drbd_vg_name }}\n
-lvm-path = /sbin\npool-name = {{ drbd_lv_name}}\ndev-path = /dev/\n[Plugin:Lvm]\n
-volume-group = {{ drbd_vg_name }}\nlvm-path = /sbin\ndev-path = /dev/\n[Plugin:ThinPool]\n
-volume-group = {{ drbd_vg_name }}\n
-lvm-path = /sbin\n
-pool-ratio = 135\n
-dev-path = /dev/\n" >> "$temp_file"
