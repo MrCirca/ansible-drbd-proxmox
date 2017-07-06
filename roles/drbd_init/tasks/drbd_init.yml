@@ -1,0 +1,82 @@
+---
+- name: Set fact for primary
+  set_fact:
+    drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
+  tags:
+    - drbd_cluster_init
+
+- name: Set fact for agents
+  set_fact:
+    drbd_agents: "{{ groups[target+'_drbd_nodes'][1:] }}"
+  tags:
+    - drbd_cluster_init
+
+- name: Create volume group
+  lvg:
+    vg: "{{ drbd_vg_name }}"
+    pvs: "{{ drbd_disks }}"
+  tags:
+    - drbd_cluster_init
+
+- name: Create volumes
+  lvol:
+    vg: "{{ drbd_vg_name }}"
+    lv: "{{ drbd_lv_name }}"
+    size: "{{ drbd_volume_size }}"
+  tags: 
+    - drbd_cluster_init
+
+- name: Convert volume to thin-pool
+  command: "lvconvert --force --type thin-pool -y {{ drbd_vg_name }}/{{ drbd_lv_name }}"
+  register: lvconvert
+  failed_when: not "'LV drbdpool/drbdthinpool is already pool' in lvconvert.stderr" 
+  tags: 
+    - drbd_cluster_init
+
+- name: Download DRBD9 proxmox plugin respository 
+  apt_key: 
+    url: "https://packages.linbit.com/package-signing-pubkey.asc" 
+    state: present 
+  tags:  
+    - drbd_cluster_init 
+ 
+- name: Add repository 
+  apt_repository: 
+    repo: "deb https://packages.linbit.com/proxmox/ proxmox-4 drbd-9.0" 
+    state: present 
+  tags:  
+    - drbd_cluster_init 
+ 
+- name: Update apt cache 
+  apt: 
+    update_cache: yes 
+    state: latest 
+  tags:  
+    - drbd_cluster_init 
+
+
+- name: Installation of drbdmanage-proxmox, drbd-dkms 
+  apt: 
+    name:   
+      - drbd-module-4.4.35-1-pve
+      - drbdmanage-proxmox 
+  tags:  
+    - drbd_cluster_init
+
+- name: Confirm that packages are installed
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - drbd-utils
+    - lvm2
+    - drbdmanage
+  tags:
+    - drbd_cluster_init
+
+- name: Initiallizing Cluster only on master node
+  command: drbdmanage init -q
+  when: inventory_hostname == drbd_primary_node
+  tags:
+    - drbd_cluster_init
+

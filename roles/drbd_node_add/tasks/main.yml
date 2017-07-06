@@ -1,0 +1,12 @@
+---
+- include: drbd_node_add.yml
+
+
+#- name: Check drbd nodes status
+#  shell: drbdmanage list-nodes | grep {{ hostvars[item]['inventory_hostname_short'] }} | cut -d "|" -f 6
+#  with_items: "{{ groups[target+'_drbd_nodes'] }}"
+#  register: list_nodes_status
+#  tags:
+#    - status
+
+
