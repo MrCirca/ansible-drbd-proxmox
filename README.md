@@ -2,7 +2,7 @@
 It's a playbook that automates Proxmox and DRBD9 installation with Ansible on two or more nodes.
 The two roles of playbook follow the official documentation of DRBD9 and Proxmox.
 
-In group_vars folder you can set a disk( **/dev/sdX**) or a list of disks which are the physical volumes of volume group.
+In group_vars folder, you can set a disk( **/dev/sdX**) or a list of disks which are the physical volumes of volume group.
 ```yaml
 ---
 drbd_disks:
