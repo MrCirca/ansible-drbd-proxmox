@@ -1,7 +1,4 @@
 ---
-- name: Drbdmanage restart
-  shell: drbdmanage restart -q
-
 - name: Create script - Storage Plugin
   template:
     src: storage_plugin.sh.j2
@@ -10,7 +7,7 @@
   tags:
     - storage_plugin
   
-- name: Modify Config 
+- name: Primary node executing "drbdmanage modify-config" for each node 
   shell: drbdmanage modify-config --node {{ hostvars[item]['inventory_hostname_short'] }}
   environment:
     EDITOR: /etc/storage_plugin.sh

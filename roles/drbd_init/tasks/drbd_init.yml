@@ -1,5 +1,5 @@
 ---
-- name: Set fact for primary
+- name: Set fact for primary_node
   set_fact:
     drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
   tags:
@@ -11,14 +11,14 @@
   tags:
     - drbd_cluster_init
 
-- name: Create volume group
+- name: Create volume group for drbd
   lvg:
     vg: "{{ drbd_vg_name }}"
     pvs: "{{ drbd_disks }}"
   tags:
     - drbd_cluster_init
 
-- name: Create volumes
+- name: Create volume
   lvol:
     vg: "{{ drbd_vg_name }}"
     lv: "{{ drbd_lv_name }}"
@@ -33,21 +33,21 @@
   tags: 
     - drbd_cluster_init
 
-- name: Download DRBD9 proxmox plugin respository 
+- name: Download DRBD9 package-signing-pubkey 
   apt_key: 
     url: "https://packages.linbit.com/package-signing-pubkey.asc" 
     state: present 
   tags:  
     - drbd_cluster_init 
  
-- name: Add repository 
+- name: Add drbd9  repository from Linbit
   apt_repository: 
     repo: "deb https://packages.linbit.com/proxmox/ proxmox-4 drbd-9.0" 
     state: present 
   tags:  
     - drbd_cluster_init 
  
-- name: Update apt cache 
+- name: Update repository packages
   apt: 
     update_cache: yes 
     state: latest 
@@ -55,7 +55,7 @@
     - drbd_cluster_init 
 
 
-- name: Installation of drbdmanage-proxmox, drbd-dkms 
+- name: Install drbd-module, drbdmanage and their dependencies 
   apt: 
     name:   
       - drbd-module-4.4.35-1-pve
@@ -63,7 +63,7 @@
   tags:  
     - drbd_cluster_init
 
-- name: Confirm that packages are installed
+- name: Confirm that packages (drbd-utils, lvm2, drbdmanage) are installed
   apt:
     name: "{{ item }}"
     state: present
@@ -74,7 +74,7 @@
   tags:
     - drbd_cluster_init
 
-- name: Initiallizing Cluster only on master node
+- name: Initializing cluster only on primary node
   command: drbdmanage init -q
   when: inventory_hostname == drbd_primary_node
   tags:
