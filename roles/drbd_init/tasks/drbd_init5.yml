@@ -46,6 +46,13 @@
     state: present 
   tags:  
     - drbd_cluster_init 
+
+- name: Add no subscription repository
+  apt_repository:
+    repo: "deb http://download.proxmox.com/debian/pve stretch pve-no-subscription"
+    state: present
+  tags:
+    - drbd_cluster_init
  
 - name: Update repository packages
   apt: 
@@ -54,29 +61,36 @@
   tags:  
     - drbd_cluster_init 
 
+- name: Find kernel release
+  command: "uname -r"
+  register: release
+  tags:
+    - pve_headers
 
-#- name: Install drbd-module, drbdmanage and their dependencies 
-#  apt: 
-#    name:   
-#      - drbd-module-4.4.35-1-pve
-#      - drbdmanage-proxmox 
-#  tags:  
-#    - drbd_cluster_init
+- name: Install drbd-module, drbdmanage and their dependencies 
+  apt: 
+    name:   
+      - pve-headers-{{release.stdout}}
+      - drbdmanage-proxmox
+      - drbd-dkms
+  tags:  
+    - drbd_cluster_init
+    - pve_headers
 
-#- name: Confirm that packages (drbd-utils, lvm2, drbdmanage) are installed
-#  apt:
-#    name: "{{ item }}"
-#    state: present
-#  with_items:
-#    - drbd-utils
-#    - lvm2
-#    - drbdmanage
-#  tags:
-#    - drbd_cluster_init
-#
-#- name: Initializing cluster only on primary node
-#  command: drbdmanage init -q
-#  when: inventory_hostname == drbd_primary_node
-#  tags:
-#    - drbd_cluster_init
-#
+- name: Confirm that packages (drbd-utils, lvm2, drbdmanage) are installed
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - drbd-utils
+    - lvm2
+    - drbdmanage
+  tags:
+    - drbd_cluster_init
+
+- name: Initializing cluster only on primary node
+  command: drbdmanage init -q
+  when: inventory_hostname == drbd_primary_node
+  tags:
+    - drbd_cluster_init
+
