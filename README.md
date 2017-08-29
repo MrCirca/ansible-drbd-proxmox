@@ -13,4 +13,4 @@ The execution of playbook is:
 ```
 ansible-playbook -u your_user main.yml -e target=name_of_prefix_you_gave_in_inventory -e drbd_volume_size=number_of_Gigabytes
 ```
-*Note: This installation is compatible only for Proxmox 4.4. DRBD9 doesn't work with Proxmox5, because  there isn't repository for this yet*
+*Note: This installation is compatible for Proxmox 4.4. DRBD9 works with Proxmox5. For Proxmox5 use drbd_init5.yml task.*
