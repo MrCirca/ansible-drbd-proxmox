@@ -46,6 +46,13 @@
     state: present 
   tags:  
     - drbd_cluster_init 
+
+- name: Add no subscription repository
+  apt_repository:
+    repo: "deb http://download.proxmox.com/debian/pve stretch pve-no-subscription"
+    state: present
+  tags:
+    - drbd_cluster_init
  
 - name: Update repository packages
   apt: 
@@ -54,29 +61,53 @@
   tags:  
     - drbd_cluster_init 
 
+- name: Find kernel release
+  command: "uname -r"
+  register: release
+  tags:
+    - pve_headers
 
-#- name: Install drbd-module, drbdmanage and their dependencies 
-#  apt: 
-#    name:   
-#      - drbd-module-4.4.35-1-pve
-#      - drbdmanage-proxmox 
-#  tags:  
-#    - drbd_cluster_init
+- name: Check Proxmox version
+  shell: "pveversion | cut -d '/' -f 2 | cut -d '.' -f 1"
+  register: pve_version
+  tags:
+    - check_pveversion
 
-#- name: Confirm that packages (drbd-utils, lvm2, drbdmanage) are installed
-#  apt:
-#    name: "{{ item }}"
-#    state: present
-#  with_items:
-#    - drbd-utils
-#    - lvm2
-#    - drbdmanage
-#  tags:
-#    - drbd_cluster_init
-#
-#- name: Initializing cluster only on primary node
-#  command: drbdmanage init -q
-#  when: inventory_hostname == drbd_primary_node
-#  tags:
-#    - drbd_cluster_init
-#
+- name: Install kernel-headers, drbdmanage-proxmox, drbd-dkms and their dependencies when Proxmox is version 5
+  apt: 
+    name:   
+      - pve-headers-{{release.stdout}}
+      - drbdmanage-proxmox
+      - drbd-dkms
+  when: pve_version.stdout == "5"
+  tags:  
+    - drbd_cluster_init
+    - check_pveversion
+
+- name: Install drbd-module, drbdmanage and their dependencies 
+  apt: 
+    name:   
+      - drbd-module-{{release.stdout}}
+      - drbdmanage-proxmox 
+  when: pve_version.stdout == "4"
+  tags:
+    - drbd_cluster_init
+    - check_pveversion
+
+- name: Confirm that packages (drbd-utils, lvm2, drbdmanage) are installed
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - drbd-utils
+    - lvm2
+    - drbdmanage
+  tags:
+    - drbd_cluster_init
+
+- name: Initializing cluster only on primary node
+  command: drbdmanage init -q
+  when: inventory_hostname == drbd_primary_node
+  tags:
+    - drbd_cluster_init
+

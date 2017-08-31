@@ -27,7 +27,7 @@
   tags:
     - drbd_node_add
 
-- name: Agents get stdout of "drbdmanage howto-join" and join in cluster
+- name: Agents get stdout of drbdmanage howto-join and join in cluster
   shell: "{{ item['stdout'] }}"
   with_items: "{{ hostvars[drbd_primary_node]['howto_join']['results'] }}"
   register: command_output
