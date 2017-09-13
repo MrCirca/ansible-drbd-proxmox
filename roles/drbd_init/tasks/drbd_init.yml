@@ -38,14 +38,16 @@
     url: "https://packages.linbit.com/package-signing-pubkey.asc" 
     state: present 
   tags:  
-    - drbd_cluster_init 
+    - drbd_cluster_init
+    - repo
  
 - name: Add drbd9  repository from Linbit
   apt_repository: 
     repo: "deb https://packages.linbit.com/proxmox/ proxmox-4 drbd-9.0" 
     state: present 
   tags:  
-    - drbd_cluster_init 
+    - drbd_cluster_init
+    - repo
 
 - name: Add no subscription repository
   apt_repository:
@@ -53,19 +55,44 @@
     state: present
   tags:
     - drbd_cluster_init
+    - repo
  
 - name: Update repository packages
   apt: 
     update_cache: yes 
     state: latest 
   tags:  
-    - drbd_cluster_init 
+    - drbd_cluster_init
+    - repo
 
-- name: Find kernel release
-  command: "uname -r"
-  register: release
+- name: Upgrade all packages to the latest version
+  apt:
+    name: 
+
+- name: Reboot
+  shell: sleep 5; reboot
+  async: 10
+  poll: 0
+  when: reboot | default(False)
   tags:
-    - pve_headers
+    - reboot
+
+- name: local action
+  wait_for:
+    delay: 15
+    port: 22
+    host: "{{ansible_default_ipv4['address']}}"
+    timeout: 250
+  delegate_to: localhost
+  tags:
+    - reboot
+
+- name: Wait to start hosts
+  wait_for:
+    port: 8006
+    state: started
+  tags:
+    - reboot
 
 - name: Check Proxmox version
   shell: "pveversion | cut -d '/' -f 2 | cut -d '.' -f 1"
@@ -75,8 +102,8 @@
 
 - name: Install kernel-headers, drbdmanage-proxmox, drbd-dkms and their dependencies when Proxmox is version 5
   apt: 
-    name:   
-      - pve-headers-{{release.stdout}}
+    name:    
+      - pve-headers
       - drbdmanage-proxmox
       - drbd-dkms
   when: pve_version.stdout == "5"

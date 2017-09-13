@@ -1,22 +1,22 @@
 ---
-- hosts: "{{ target + '_drbd_nodes' }}"
-  roles:
-     - common
+#- hosts: "{{ target + '_drbd_nodes' }}"
+#  roles:
+#     - common
    
 - hosts: "{{ target + '_drbd_nodes' }}"
   roles:
     - role: drbd_init
 
-- hosts: "{{ target + '_drbd_nodes' }}"
+#- hosts: "{{ target + '_drbd_nodes' }}"
 #  serial: 1
-  roles:
-    - role: drbd_node_add
+#  roles:
+#    - role: drbd_node_add
 
-- hosts: "{{ target + '_drbd_nodes' }}"
-  roles:
-    - role: drbd_storage_plugin
+#- hosts: "{{ target + '_drbd_nodes' }}"
+#  roles:
+#    - role: drbd_storage_plugin
 
-- hosts: "{{ target + '_drbd_nodes' }}"
-  roles:
-    - role: proxmox
+#- hosts: "{{ target + '_drbd_nodes' }}"
+#  roles:
+#    - role: proxmox
 
