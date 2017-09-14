@@ -49,10 +49,18 @@
     - drbd_cluster_init
     - repo
 
+- name: Check Proxmox version 
+  shell: "pveversion | cut -d '/' -f 2 | cut -d '.' -f 1" 
+  register: pve_version 
+  tags: 
+    - check_pveversion
+
+
 - name: Add no subscription repository
   apt_repository:
     repo: "deb http://download.proxmox.com/debian/pve stretch pve-no-subscription"
     state: present
+  when: pve_version.stdout == "5"
   tags:
     - drbd_cluster_init
     - repo
@@ -65,45 +73,49 @@
     - drbd_cluster_init
     - repo
 
-- name: Upgrade all packages to the latest version
-  apt:
-    name: 
+#- name: Check if there is pve-kernel upgrade
+#  shell: apt list --upgradable 2>/dev/null | grep -c '^pve-kernel'
+#  register: kernel_upgrade
+#  ignore_errors: True
 
-- name: Reboot
-  shell: sleep 5; reboot
-  async: 10
-  poll: 0
-  when: reboot | default(False)
-  tags:
-    - reboot
+#- name: Upgrade all packages to the latest version
+#  apt:
+#    upgrade: dist
+#  when: kernel_upgrade.stdout == "1"
 
-- name: local action
-  wait_for:
-    delay: 15
-    port: 22
-    host: "{{ansible_default_ipv4['address']}}"
-    timeout: 250
-  delegate_to: localhost
-  tags:
-    - reboot
+#- name: Reboot
+#  shell: sleep 5; reboot
+#  async: 10
+#  poll: 0
+#  when: reboot | default(False) and kernel_upgrade.stdout == "1"
+#  tags:
+#    - reboot
 
-- name: Wait to start hosts
-  wait_for:
-    port: 8006
-    state: started
-  tags:
-    - reboot
+#- name: local action
+#  wait_for:
+#    delay: 15
+#    port: 22
+#    host: "{{ansible_default_ipv4['address']}}"
+#    timeout: 250
+#  delegate_to: localhost
+#  tags:
+#    - reboot
 
-- name: Check Proxmox version
-  shell: "pveversion | cut -d '/' -f 2 | cut -d '.' -f 1"
-  register: pve_version
-  tags:
-    - check_pveversion
+#- name: Wait to start hosts
+#  wait_for:
+#    port: 8006
+#    state: started
+#  tags:
+#    - reboot
+
+- name: Find kernel release
+  command: "uname -r"
+  register: release
 
 - name: Install kernel-headers, drbdmanage-proxmox, drbd-dkms and their dependencies when Proxmox is version 5
   apt: 
     name:    
-      - pve-headers
+      - pve-headers-{{release.stdout}}
       - drbdmanage-proxmox
       - drbd-dkms
   when: pve_version.stdout == "5"
@@ -113,8 +125,7 @@
 
 - name: Install drbd-module, drbdmanage and their dependencies 
   apt: 
-    name:   
-      - drbd-module-{{release.stdout}}
+    name:    
       - drbdmanage-proxmox 
   when: pve_version.stdout == "4"
   tags:
