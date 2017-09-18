@@ -1,11 +1,19 @@
 ---
 - hosts: "{{ target + '_drbd_nodes' }}"
-  roles
-     - common
-   
+  roles:
+    - common
+     
 - hosts: "{{ target + '_drbd_nodes' }}"
   roles:
-     - drbd_node
+    - drbd_node
+  
+- include: drbd_init.yml
+  tags:
+    - init
+
+- include: drbd_node_add.yml
+  tags:
+    - node_add
 
 - hosts: "{{ target + '_drbd_nodes' }}"
   roles:
