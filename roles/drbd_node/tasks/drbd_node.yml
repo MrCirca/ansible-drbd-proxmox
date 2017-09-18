@@ -73,40 +73,40 @@
     - drbd_cluster_init
     - repo
 
-#- name: Check if there is pve-kernel upgrade
-#  shell: apt list --upgradable 2>/dev/null | grep -c '^pve-kernel'
-#  register: kernel_upgrade
-#  ignore_errors: True
+- name: Check if there is pve-kernel upgrade
+  shell: apt list --upgradable 2>/dev/null | grep -c '^pve-kernel'
+  register: kernel_upgrade
+  ignore_errors: True
 
-#- name: Upgrade all packages to the latest version
-#  apt:
-#    upgrade: dist
-#  when: kernel_upgrade.stdout == "1"
+- name: Upgrade all packages to the latest version
+  apt:
+    upgrade: dist
+  when: kernel_upgrade.stdout == "1"
 
-#- name: Reboot
-#  shell: sleep 5; reboot
-#  async: 10
-#  poll: 0
-#  when: reboot | default(False) and kernel_upgrade.stdout == "1"
-#  tags:
-#    - reboot
+- name: Reboot
+  shell: sleep 5; reboot
+  async: 10
+  poll: 0
+  when: reboot | default(False) and kernel_upgrade.stdout == "1"
+  tags:
+    - reboot
 
-#- name: local action
-#  wait_for:
-#    delay: 15
-#    port: 22
-#    host: "{{ansible_default_ipv4['address']}}"
-#    timeout: 250
-#  delegate_to: localhost
-#  tags:
-#    - reboot
+- name: local action
+  wait_for:
+    delay: 15
+    port: 22
+    host: "{{ansible_default_ipv4['address']}}"
+    timeout: 250
+  delegate_to: localhost
+  tags:
+    - reboot
 
-#- name: Wait to start hosts
-#  wait_for:
-#    port: 8006
-#    state: started
-#  tags:
-#    - reboot
+- name: Wait to start hosts
+  wait_for:
+    port: 8006
+    state: started
+  tags:
+    - reboot
 
 - name: Find kernel release
   command: "uname -r"
@@ -143,9 +143,4 @@
   tags:
     - drbd_cluster_init
 
-- name: Initializing cluster only on primary node
-  command: drbdmanage init -q
-  when: inventory_hostname == drbd_primary_node
-  tags:
-    - drbd_cluster_init
 

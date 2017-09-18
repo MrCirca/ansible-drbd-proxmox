@@ -1,8 +1,24 @@
 ---
 - hosts: "{{ target + '_drbd_nodes' }}"
-- name: Initializing cluster only on primary node
-  command: drbdmanage init -q
-  when: inventory_hostname == drbd_primary_node
-  tags:
-    - drbd_cluster_init
+  tasks:
+    - name: Set fact for primary_node
+      set_fact:
+        drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
+      tags:
+        - drbd_cluster_init
+
+    - name: Set fact for agents
+      set_fact:
+         drbd_agents: "{{ groups[target+'_drbd_nodes'][1:] }}"
+      tags:
+        - drbd_cluster_init
+
+    #- name: Check if cluster is initialized
+    #  command: drbdmanage list-nodes -m | grep -c '^{{ ansible_hostname }}'
+
+    - name: Initializing cluster only on primary node
+      command: drbdmanage init -q
+      when: inventory_hostname == drbd_primary_node
+      tags:
+        - drbd_cluster_init
 
