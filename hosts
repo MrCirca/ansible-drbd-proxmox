@@ -43,9 +43,9 @@
 #db-[99:101]-node.example.com
 
 [test1_drbd_nodes]
-pve4-1.in.modulus.gr
-pve4-2.in.modulus.gr
-pve4-3.in.modulus.gr
+pve5-1.in.modulus.gr
+pve5-2.in.modulus.gr
+pve5-3.in.modulus.gr
 
 #[local]
 #localhost

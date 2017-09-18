@@ -1,0 +1,8 @@
+---
+- hosts: "{{ target + '_drbd_nodes' }}"
+- name: Initializing cluster only on primary node
+  command: drbdmanage init -q
+  when: inventory_hostname == drbd_primary_node
+  tags:
+    - drbd_cluster_init
+

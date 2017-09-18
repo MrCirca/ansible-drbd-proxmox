@@ -1,5 +1,5 @@
 ---
-
+- hosts: "{{ target + '_drbd_nodes' }}"
 - name: Set fact for primary node
   set_fact:
     drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
