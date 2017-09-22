@@ -1,0 +1,40 @@
+---
+- hosts: "{{ target + '_drbd_nodes' }}"
+  tasks:
+    - name: Set fact for primary node
+      set_fact:
+        drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
+
+    - name: Set fact for agents
+      set_fact:
+        drbd_agents: "{{ groups[target+'_drbd_nodes'][1:] }}"
+
+    - name: Primary node add agents in cluster
+      command: drbdmanage add-node {{ hostvars[item]['inventory_hostname_short'] }} {{ hostvars[item]['ansible_default_ipv4']["address"] }}
+      with_items: "{{ drbd_agents }}"
+      register: add_node_command
+      until: add_node_command.rc == 0
+      retries: 5
+      when: inventory_hostname == drbd_primary_node
+
+
+    - name: Primary node, executing "drbdmanage howto-join ... "
+      command: drbdmanage howto-join -q {{ hostvars[item]['inventory_hostname_short'] }}
+      with_items: "{{ drbd_agents }}"
+      register: howto_join
+      until: howto_join.rc == 0
+      retries: 5
+      when: inventory_hostname == drbd_primary_node and item in drbd_agents
+      tags:
+        - drbd_node_add
+
+    - name: Agents get stdout of drbdmanage howto-join and join in cluster
+      shell: "{{ item['stdout'] }}"
+      with_items: "{{ hostvars[drbd_primary_node]['howto_join']['results'] }}"
+      register: command_output
+      until: command_output.rc == 0
+      retries: 5
+      when: inventory_hostname in drbd_agents and item['item'] == inventory_hostname
+      tags:
+        - drbd_node_add
+

@@ -1,28 +1,23 @@
 ---
-- name: Comment proxmox enterprise repository
-  lineinfile:
-     dest: /etc/apt/sources.list.d/pve-enterprise.list
-     regexp: '^'
-     line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
-     state: present
-
-- name: Updates
-  apt:
-    update_cache: yes
-    upgrade: dist
-
 - name: Set fact Proxmox master
   set_fact:
     proxmox_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
+  tags:
+    - cluster
 
 - name: Set fact for Proxmox agents
   set_fact:
     proxmox_agents: "{{ groups[target+'_drbd_nodes'][1:] }}"
-  
+  tags:
+    - cluster
+
 - name: Create a cluster on master
   shell: pvecm create my-cluster
+  register: cluster_init
   when: inventory_hostname_short in proxmox_primary_node
-  ignore_errors: yes
+  failed_when: not "'cluster config '/etc/pve/corosync.conf' already exists' in cluster_init.stderr"
+  tags:
+    - cluster
 
 - name: Nodes add themselves in cluster
   command: pvecm add {{ proxmox_primary_node }} -force
@@ -30,6 +25,8 @@
   until: result.rc == 0
   retries: 5
   when: inventory_hostname in proxmox_agents
+  tags:
+    - cluster
  
 - name: Add drbdstorage configuration in a storage file
   template:
@@ -38,7 +35,11 @@
     owner: root
     group: www-data
   when: inventory_hostname == proxmox_primary_node
+  tags:
+    - cluster
 
 - name: Copy storage.cfg to /etc/pve
   shell: cp /tmp/storage.cfg /etc/pve/ && rm /tmp/storage.cfg
   when: inventory_hostname == proxmox_primary_node
+  tags:
+    - storage

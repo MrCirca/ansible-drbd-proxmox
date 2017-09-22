@@ -1,10 +1,26 @@
 ---
-- hosts: all
+- hosts: "{{ target + '_drbd_nodes' }}"
   roles:
-     - ssh
-     - proxmox
-#     - drbd
-  vars_files:
-    - group_vars/test1_drbd_cluster
-    
-  
+    - common
+  tags:
+    - common
+     
+- hosts: "{{ target + '_drbd_nodes' }}"
+  roles:
+    - drbd_node
+  tags:
+    - drbd_node
+
+- include: drbd_init.yml
+  tags:
+    - init
+
+- include: drbd_node_add.yml
+  tags:
+    - node_add
+
+- hosts: "{{ target + '_drbd_nodes' }}"
+  roles:
+    - role: proxmox
+  tags:
+    - proxmox
