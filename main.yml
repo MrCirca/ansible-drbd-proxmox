@@ -2,11 +2,15 @@
 - hosts: "{{ target + '_drbd_nodes' }}"
   roles:
     - common
+  tags:
+    - common
      
 - hosts: "{{ target + '_drbd_nodes' }}"
   roles:
     - drbd_node
-  
+  tags:
+    - drbd_node
+
 - include: drbd_init.yml
   tags:
     - init
@@ -18,4 +22,5 @@
 - hosts: "{{ target + '_drbd_nodes' }}"
   roles:
     - role: proxmox
-
+  tags:
+    - proxmox
