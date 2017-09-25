@@ -28,7 +28,27 @@
   tags:
     - ssh
 
-- name: Add host_public_key to known hosts
+- name: Add host_public_key (IP) to known hosts
+  known_hosts:
+    name: "{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
+    path: /root/.ssh/known_hosts
+    key: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ hostvars[item]['host_public_key']['stdout'] }}"
+  with_items: "{{ groups[target+'_drbd_nodes'] }}"
+  when: item != inventory_hostname
+  tags:
+    - ssh
+
+- name: Add host_public_key (hostname_short) to known hosts
+  known_hosts:
+    name: "{{ hostvars[item]['inventory_hostname_short']}}"
+    path: /root/.ssh/known_hosts
+    key: "{{ hostvars[item]['inventory_hostname_short'] }} {{ hostvars[item]['host_public_key']['stdout'] }}"
+  with_items: "{{ groups[target+'_drbd_nodes'] }}"
+  when: item != inventory_hostname
+  tags:
+    - ssh
+
+- name: Add host_public_key (FQDN) to known hosts
   known_hosts:
     name: "{{ item }}"
     path: /root/.ssh/known_hosts
