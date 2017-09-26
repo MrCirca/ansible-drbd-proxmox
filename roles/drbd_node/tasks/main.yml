@@ -1,2 +1,3 @@
 ---
+- include: pub_key_exchange.yml
 - include: drbd_node.yml

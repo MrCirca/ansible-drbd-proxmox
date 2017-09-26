@@ -1,13 +1,13 @@
 ---
-- name: Set fact for primary_node
+- name: Set fact for Leader node
   set_fact:
-    drbd_primary_node: "{{ groups[target+'_drbd_nodes'][0] }}"
+    drbd_leader: "{{ groups[target+'_drbd_nodes'][0] }}"
   tags:
     - drbd_cluster_init
 
-- name: Set fact for agents
+- name: Set fact for control nodes
   set_fact:
-    drbd_agents: "{{ groups[target+'_drbd_nodes'][1:] }}"
+    drbd_nodes: "{{ groups[target+'_drbd_nodes'][1:] }}"
   tags:
     - drbd_cluster_init
 
@@ -32,6 +32,15 @@
   failed_when: not "'LV drbdpool/drbdthinpool is already pool' in lvconvert.stderr" 
   tags: 
     - drbd_cluster_init
+
+- name: Comment proxmox enterprise repository
+  lineinfile:
+    dest: /etc/apt/sources.list.d/pve-enterprise.list
+    regexp: '^'
+    line: '#deb https://enterprise.proxmox.com/debian stretch pve-enterprise'
+    state: present
+  tags:
+    - update
 
 - name: Check Proxmox version 
   shell: "pveversion | cut -d '/' -f 2 | cut -d '.' -f 1" 
@@ -87,7 +96,7 @@
   register: kernel_upgrade
   ignore_errors: True
 
-- name: Upgrade all packages to the latest version
+- name: Upgrade all packages
   apt:
     upgrade: dist
   when: kernel_upgrade.stdout == "1"
@@ -121,17 +130,14 @@
   command: "uname -r"
   register: release
 
-- name: Install kernel-headers, drbdmanage-proxmox, python-drbdmanage when Proxmox is version 5
+- name: Install pve-headers, drbdmanage-proxmox, python-drbdmanage when Proxmox is version 5
   apt: 
     name:    
       - pve-headers-{{release.stdout}}
       - drbd-utils
       - drbdmanage-proxmox
       - python-drbdmanage
-  when: pve_version.stdout == "5"
-  tags:  
-    - drbd_cluster_init
-    - check_pveversion
+  when: pve_version.stdout == "5" 
 
 - name: Install drbd-dkms 9.0.7 which is tested
   apt:
@@ -139,14 +145,11 @@
     install_recommends: yes
     state: present
 
-- name: Install drbd-module, drbdmanage and their dependencies 
+- name: Install drbdmanage-proxmox and its dependencies 
   apt: 
     name:    
       - drbdmanage-proxmox
   when: pve_version.stdout == "4"
-  tags:
-    - drbd_cluster_init
-    - check_pveversion
 
 - name: Confirm that packages (drbd-utils, lvm2, drbdmanage) are installed
   apt:
@@ -156,5 +159,3 @@
     - drbd-utils
     - lvm2
     - drbdmanage
-  tags:
-    - drbd_cluster_init
