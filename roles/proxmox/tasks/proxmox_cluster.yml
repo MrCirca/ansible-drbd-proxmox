@@ -20,14 +20,14 @@
     - cluster
 
 - name: Nodes add themselves in cluster
-  command: pvecm add {{ proxmox_leader_node }} -force
+  command: pvecm add {{ hostvars[proxmox_leader_node]['inventory_hostname_short'] }} --force
   register: result
   until: result.rc == 0
   retries: 5
   when: inventory_hostname in proxmox_nodes
   tags:
     - cluster
- 
+
 - name: Add drbdstorage configuration in a temporary file
   template:
     src: storage.cfg.j2

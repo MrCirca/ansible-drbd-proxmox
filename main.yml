@@ -1,9 +1,9 @@
 ---    
-#- hosts: "{{ target + '_drbd_nodes' }}"
-#  roles:
-#    - drbd_node
-#  tags:
-#    - drbd_node
+- hosts: "{{ target + '_drbd_nodes' }}"
+  roles:
+    - drbd_node
+  tags:
+    - drbd_node
 
 - include: drbd_init.yml
   tags:

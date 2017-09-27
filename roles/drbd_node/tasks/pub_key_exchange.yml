@@ -37,3 +37,13 @@
   when: item != inventory_hostname
   tags:
     - ssh
+
+- name: Add host_public_key (short hostname) to known hosts
+  known_hosts:
+    name: "{{ hostvars[item]['inventory_hostname_short'] }}"
+    path: /root/.ssh/known_hosts
+    key: "{{ hostvars[item]['inventory_hostname_short'] }} {{ hostvars[item]['host_public_key']['stdout'] }}"
+  with_items: "{{ groups[target+'_drbd_nodes'] }}"
+  when: item != inventory_hostname
+  tags:
+    - ssh

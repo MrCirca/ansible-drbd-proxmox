@@ -91,40 +91,40 @@
     - drbd_cluster_init
     - repo
 
-- name: Check if there is pve-kernel upgrade
-  shell: apt list --upgradable 2>/dev/null | grep -c '^pve-kernel'
-  register: kernel_upgrade
-  ignore_errors: True
+#- name: Check if there is pve-kernel upgrade
+#  shell: apt list --upgradable 2>/dev/null | grep -c '^pve-kernel'
+#  register: kernel_upgrade
+#  ignore_errors: True
 
-- name: Upgrade all packages
-  apt:
-    upgrade: dist
-  when: kernel_upgrade.stdout == "1"
+#- name: Upgrade all packages
+#  apt:
+#    upgrade: dist
+#  when: kernel_upgrade.stdout == "1"
 
-- name: Reboot
-  shell: sleep 5; reboot
-  async: 10
-  poll: 0
-  when: reboot | default(False) and kernel_upgrade.stdout == "1"
-  tags:
-    - reboot
+#- name: Reboot
+#  shell: sleep 5; reboot
+#  async: 10
+#  poll: 0
+#  when: reboot | default(False) and kernel_upgrade.stdout == "1"
+#  tags:
+#    - reboot
 
-- name: local action
-  wait_for:
-    delay: 15
-    port: 22
-    host: "{{ansible_default_ipv4['address']}}"
-    timeout: 300
-  delegate_to: localhost
-  tags:
-    - reboot
+#- name: local action
+#  wait_for:
+#    delay: 15
+#    port: 22
+#    host: "{{ansible_default_ipv4['address']}}"
+#    timeout: 300
+#  delegate_to: localhost
+#  tags:
+#    - reboot
 
-- name: Wait to start hosts
-  wait_for:
-    port: 8006
-    state: started
-  tags:
-    - reboot
+#- name: Wait to start hosts
+#  wait_for:
+#    port: 8006
+#    state: started
+#  tags:
+#    - reboot
 
 - name: Find kernel release
   command: "uname -r"
@@ -137,6 +137,9 @@
       - drbd-utils
       - drbdmanage-proxmox
       - python-drbdmanage
+      - git
+#      - drbd-dkms
+    state: present
   when: pve_version.stdout == "5" 
 
 - name: Install drbd-dkms 9.0.7 which is tested
@@ -149,6 +152,7 @@
   apt: 
     name:    
       - drbdmanage-proxmox
+      - git
   when: pve_version.stdout == "4"
 
 - name: Confirm that packages (drbd-utils, lvm2, drbdmanage) are installed
@@ -159,3 +163,25 @@
     - drbd-utils
     - lvm2
     - drbdmanage
+
+- name: Unarchive a file that needs to be downloaded
+  unarchive:
+    src: https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
+    dest: /usr/local
+    remote_src: yes
+
+- name: Download drbdtop
+  command: /usr/local/go/bin/go get github.com/linbit/drbdtop
+
+- name: Copy drbtop to /usr/bin
+  copy:
+    src: /root/go/bin/drbdtop
+    dest: /usr/bin/
+    remote_src: yes
+    owner: root
+    mode: u+x
+
+- name: Delete directory
+  file:
+    path: /root/go/
+    state: absent
