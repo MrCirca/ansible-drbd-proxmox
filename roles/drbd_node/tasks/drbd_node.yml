@@ -91,15 +91,6 @@
     - drbd_cluster_init
     - repo
 
-#- name: Check if there is pve-kernel upgrade
-#  shell: apt list --upgradable 2>/dev/null | grep -c '^pve-kernel'
-#  register: kernel_upgrade
-#  ignore_errors: True
-
-#- name: Upgrade all packages
-#  apt:
-#    upgrade: dist
-#  when: kernel_upgrade.stdout == "1"
 
 #- name: Reboot
 #  shell: sleep 5; reboot
@@ -126,21 +117,19 @@
 #  tags:
 #    - reboot
 
-- name: Find kernel release
-  command: "uname -r"
-  register: release
-
 - name: Install pve-headers, drbdmanage-proxmox, python-drbdmanage when Proxmox is version 5
   apt: 
-    name:    
-      - pve-headers-{{release.stdout}}
+    name:
+      - proxmox-ve    
+      - pve-headers
       - drbd-utils
       - drbdmanage-proxmox
       - python-drbdmanage
-      - git
 #      - drbd-dkms
-    state: present
+      - git
+    state: latest
   when: pve_version.stdout == "5" 
+
 
 - name: Install drbd-dkms 9.0.7 which is tested
   apt:
@@ -164,14 +153,21 @@
     - lvm2
     - drbdmanage
 
+- name: Check if drbdtop is installed
+  stat:
+    path: /usr/bin/drbdtop
+  register: drbdtop
+
 - name: Unarchive a file that needs to be downloaded
   unarchive:
     src: https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
     dest: /usr/local
     remote_src: yes
+  when: drbdtop.stat.exists == False
 
 - name: Download drbdtop
   command: /usr/local/go/bin/go get github.com/linbit/drbdtop
+  when: drbdtop.stat.exists == False
 
 - name: Copy drbtop to /usr/bin
   copy:
@@ -180,8 +176,10 @@
     remote_src: yes
     owner: root
     mode: u+x
+  when: drbdtop.stat.exists == False
 
 - name: Delete directory
   file:
     path: /root/go/
     state: absent
+  when: drbdtop.stat.exists == False

@@ -11,23 +11,6 @@
   tags:
     - cluster
 
-- name: Create a cluster on master
-  shell: pvecm create my-cluster
-  register: cluster_init
-  when: inventory_hostname_short in proxmox_leader_node
-  failed_when: not "'cluster config '/etc/pve/corosync.conf' already exists' in cluster_init.stderr"
-  tags:
-    - cluster
-
-- name: Nodes add themselves in cluster
-  command: pvecm add {{ hostvars[proxmox_leader_node]['inventory_hostname_short'] }} --force
-  register: result
-  until: result.rc == 0
-  retries: 5
-  when: inventory_hostname in proxmox_nodes
-  tags:
-    - cluster
-
 - name: Add drbdstorage configuration in a temporary file
   template:
     src: storage.cfg.j2
@@ -43,3 +26,22 @@
   when: inventory_hostname == proxmox_leader_node
   tags:
     - storage
+
+- name: Create a cluster on master
+  shell: pvecm create my-cluster
+  register: cluster_init
+  when: inventory_hostname == proxmox_leader_node
+  failed_when: not "'cluster config '/etc/pve/corosync.conf' already exists' in cluster_init.stderr"
+  tags:
+    - cluster
+
+- name: Nodes add themselves in cluster
+  command: pvecm add {{ hostvars[proxmox_leader_node]['ansible_default_ipv4']['address'] }} --force
+  register: result
+  until: result.rc == 0
+  retries: 5
+  when: inventory_hostname in proxmox_nodes
+  tags:
+    - cluster
+
+
