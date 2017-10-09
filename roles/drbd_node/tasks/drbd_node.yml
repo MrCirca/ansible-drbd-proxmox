@@ -11,6 +11,12 @@
   tags:
     - drbd_cluster_init
 
+- name: Drbdmanage itself executes wipefs on created block devices
+  lineinfile:
+     dest: /etc/lvm/lvm.conf
+     regexp: '^\s+wipe_signatures_when_zeroing_new_lvs\s=\s1'
+     line: '        wipe_signatures_when_zeroing_new_lvs = 0'
+
 - name: Create volume group for drbd
   lvg:
     vg: "{{ drbd_vg_name }}"
