@@ -5,17 +5,17 @@
   tags:
     - drbd_node
 
-#- include: drbd_init.yml
-#  tags:
-#    - init
-#
-#- include: drbd_node_add.yml
-#  tags:
-#    - node_add
+- include: drbd_init.yml
+  tags:
+    - init
 
-#- hosts: "{{ target + '_drbd_nodes' }}"
-#  roles:
-#    - role: proxmox
-#  tags:
-#    - proxmox
+- include: drbd_node_add.yml
+  tags:
+    - node_add
+
+- hosts: "{{ target + '_drbd_nodes' }}"
+  roles:
+    - role: proxmox
+  tags:
+    - proxmox
 

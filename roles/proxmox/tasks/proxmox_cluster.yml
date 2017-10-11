@@ -36,7 +36,7 @@
     - cluster
 
 - name: Nodes add themselves in cluster
-  command: pvecm add {{ hostvars[proxmox_leader_node]['ansible_default_ipv4']['address'] }} --force
+  shell: pvecm add {{ hostvars[proxmox_leader_node]['ansible_default_ipv4']['address'] }} --force; sleep 20
   register: result
   until: result.rc == 0
   retries: 5
